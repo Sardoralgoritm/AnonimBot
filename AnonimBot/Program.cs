@@ -73,6 +73,14 @@ class Program
                         cancellationToken: cancellationToken);
                     }
                 }
+                else
+                {
+                    await botClient.SendTextMessageAsync(
+                    chatId: ADMIN,
+                    text: $"*Iltimos xabarni userni xabariga reply qilib jo'nating*",
+                    parseMode: ParseMode.MarkdownV2,
+                    cancellationToken: cancellationToken);
+                }
             }
             else
             {
