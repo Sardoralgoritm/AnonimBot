@@ -5,6 +5,7 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using static System.Net.Mime.MediaTypeNames;
 
 class Program
 {
@@ -42,7 +43,6 @@ class Program
             if (message.Text is not { } messageText)
                 return;
 
-
             if (message.Chat.Id == ADMIN)
             {
                 if (message.ReplyToMessage != null)
@@ -63,7 +63,6 @@ class Program
                             parseMode: ParseMode.MarkdownV2,
                             cancellationToken: cancellationToken);
 
-                        Console.WriteLine($"Received a '{messageText}' message in chat {chatId} user {message.Chat.LastName}");
                     }
                     else
                     {
@@ -74,31 +73,37 @@ class Program
                         cancellationToken: cancellationToken);
                     }
                 }
-                else
-                {
-                    await botClient.SendTextMessageAsync(
-                        chatId: ADMIN,
-                        text: $"*Iltimos xabarni reply qilib jo'nating*",
-                        parseMode: ParseMode.MarkdownV2,
-                        cancellationToken: cancellationToken);
-                }
             }
             else
             {
-                await botClient.ForwardMessageAsync(
-                    chatId: ADMIN,
-                    fromChatId: message.Chat.Id,
-                    messageId: message.MessageId,
-                    cancellationToken: cancellationToken
-                    );
-
-                await botClient.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        text: $"*Xabaringiz yetkazildi*",
-                        parseMode: ParseMode.MarkdownV2,
+                Message forward_Message = await botClient.ForwardMessageAsync(
+                chatId: ADMIN,
+                fromChatId: message.Chat.Id,
+                messageId: message.MessageId,
+                cancellationToken: cancellationToken
+                );
+                if (forward_Message.ForwardFrom != null)
+                {
+                    await botClient.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: $"*Xabaringiz yetkazildi*",
+                    parseMode: ParseMode.MarkdownV2,
+                    cancellationToken: cancellationToken);
+                }
+                else
+                {
+                    await botClient.DeleteMessageAsync(
+                        chatId: ADMIN,
+                        messageId: forward_Message.MessageId,
                         cancellationToken: cancellationToken);
-            }
 
+                    await botClient.SendTextMessageAsync(
+                    chatId: message.Chat.Id,
+                    text: $"*Bot xabaringizni Adminga forward qila olmadi\nIltimos Forward sozlamalaringizni to'g'rilang\nAks holda Admin sizga javob yoza olmaydi*",
+                    parseMode: ParseMode.MarkdownV2,
+                    cancellationToken: cancellationToken);
+                }
+            }
         }
         Task HandlePollingErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken)
         {
