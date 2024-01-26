@@ -1,17 +1,22 @@
 using AnonimBotWithAPI.Configs;
-using AnonimBotWithAPI.Configs;
 using System.Text.RegularExpressions;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using static System.Net.Mime.MediaTypeNames;
 
 class Program
 {
     public static async Task Main(string[] args)
     {
+        var builder = WebApplication.CreateBuilder(args);
+        builder.WebHost.UseWebRoot("wwwroot");
+        builder.WebHost.UseUrls("http://localhost:7788");
+
+        var app = builder.Build();
+        Task.Run(() => app.Run());
+
         var TOKEN = Config.TOKEN;
         var ADMIN = Config.ADMIN;
         var botClient = new TelegramBotClient(TOKEN);
